@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
-import { Box, Avatar, Typography, Paper } from '@mui/material';
+import { Box, Avatar, Typography, Paper, Menu, MenuItem } from '@mui/material';
+import { signOut } from 'firebase/auth';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -17,6 +18,29 @@ L.Icon.Default.mergeOptions({
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleProfileClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  const handleOpenSpecialMap = () => {
+    handleClose();
+    navigate('/special-map');
+  };
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -47,8 +71,10 @@ const Dashboard = () => {
         gap: 2,
         bgcolor: 'rgba(255, 255, 255, 0.9)',
         borderRadius: 2,
-        boxShadow: 2
-      }}>
+        boxShadow: 2,
+        cursor: 'pointer'
+      }}
+      onClick={handleProfileClick}>
         <Typography variant="subtitle1" sx={{ color: 'black' }}>
           {user.displayName || user.email}
         </Typography>
@@ -57,6 +83,22 @@ const Dashboard = () => {
           alt={user.displayName || user.email}
         />
       </Box>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={handleOpenSpecialMap}>Open Special Map</MenuItem>
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+      </Menu>
       
       <Box sx={{ height: '100%', width: '100%' }}>
         <MapContainer
