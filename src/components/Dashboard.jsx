@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
-import { Box, Avatar, Typography, Paper, Menu, MenuItem } from '@mui/material';
+import { Box, Avatar, Typography, Paper, Menu, MenuItem, Button } from '@mui/material';
 import { signOut } from 'firebase/auth';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -39,7 +39,7 @@ const Dashboard = () => {
 
   const handleOpenSpecialMap = () => {
     handleClose();
-    navigate('/special-map');
+    window.open('https://incois.gov.in/geoportal/MFASPFZ/index.html', '_blank');
   };
 
   useEffect(() => {
@@ -60,21 +60,23 @@ const Dashboard = () => {
 
   return (
     <Box sx={{ height: '100vh', width: '100vw', position: 'relative' }}>
-      <Box sx={{ 
-        position: 'absolute',
-        top: 16,
-        right: 16,
-        zIndex: 1000,
-        p: 2, 
-        display: 'flex', 
-        alignItems: 'center',
-        gap: 2,
-        bgcolor: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: 2,
-        boxShadow: 2,
-        cursor: 'pointer'
-      }}
-      onClick={handleProfileClick}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          zIndex: 1000,
+          p: 2,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          bgcolor: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: 2,
+          boxShadow: 2,
+          cursor: 'pointer'
+        }}
+        onClick={handleProfileClick}
+      >
         <Typography variant="subtitle1" sx={{ color: 'black' }}>
           {user.displayName || user.email}
         </Typography>
@@ -83,6 +85,29 @@ const Dashboard = () => {
           alt={user.displayName || user.email}
         />
       </Box>
+
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 16,
+          left: 16,
+          zIndex: 1000,
+        }}
+      >
+        <Button
+          variant="contained"
+          onClick={handleOpenSpecialMap}
+          sx={{
+            bgcolor: 'rgba(25, 118, 210, 0.9)',
+            '&:hover': {
+              bgcolor: 'rgba(25, 118, 210, 0.7)'
+            }
+          }}
+        >
+          Access Marine Map
+        </Button>
+      </Box>
+
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
