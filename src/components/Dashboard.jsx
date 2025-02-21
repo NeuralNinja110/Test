@@ -6,6 +6,7 @@ import { signOut } from 'firebase/auth';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 // Fix for default marker icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -19,6 +20,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [coordinates, setCoordinates] = useState(null);
+  const [locationError, setLocationError] = useState('');
 
   const handleProfileClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -51,7 +54,34 @@ const Dashboard = () => {
       }
     });
 
-    return () => unsubscribe();
+    // Get user's location
+    if (navigator.geolocation) {
+      const watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          setCoordinates({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          setLocationError('');
+        },
+        (error) => {
+          setLocationError('Unable to retrieve your location');
+          console.error('Error getting location:', error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+
+      return () => {
+        unsubscribe();
+        navigator.geolocation.clearWatch(watchId);
+      };
+    } else {
+      setLocationError('Geolocation is not supported by your browser');
+    }
   }, [navigate]);
 
   if (!user) return null;
@@ -124,6 +154,29 @@ const Dashboard = () => {
         <MenuItem onClick={handleOpenSpecialMap}>Open Special Map</MenuItem>
         <MenuItem onClick={handleLogout}>Logout</MenuItem>
       </Menu>
+
+      {coordinates && (
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 16,
+            right: 16,
+            zIndex: 1000,
+            p: 2,
+            bgcolor: 'rgba(255, 255, 255, 0.9)',
+            borderRadius: 2,
+            boxShadow: 2,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
+        >
+          <LocationOnIcon sx={{ color: 'black' }} />
+          <Typography variant="body2" sx={{ color: 'black' }}>
+            Lat: {coordinates.lat.toFixed(6)}, Lng: {coordinates.lng.toFixed(6)}
+          </Typography>
+        </Box>
+      )}
       
       <Box sx={{ height: '100%', width: '100%' }}>
         <MapContainer
